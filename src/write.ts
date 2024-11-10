@@ -19,6 +19,10 @@ export class BOBWriter {
     this.#view = new DataView(this.#data.buffer);
   }
 
+  primitive(value: BOBPrimitive): this {
+    return this;
+  }
+
   string(value: string): this {
     return this;
   }
