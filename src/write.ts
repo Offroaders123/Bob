@@ -1,3 +1,4 @@
+import { MUtf8Encoder } from "mutf-8";
 import { getTag, TAG } from "./primitive.js";
 
 import type { BOBArray, BOBObject, BOBPrimitive } from "./primitive.js";
@@ -11,7 +12,7 @@ export class BOBWriter {
   #byteOffset: number = 0;
   #data: Uint8Array = new Uint8Array(1024);
   #view: DataView = new DataView(this.#data.buffer);
-  readonly #encoder: TextEncoder = new TextEncoder();
+  readonly #encoder: MUtf8Encoder = new MUtf8Encoder();
 
   seal(): Uint8Array {
     return this.#data.slice(0, this.#byteOffset);
@@ -53,10 +54,11 @@ export class BOBWriter {
     this.#tag(TAG.STRING);
     const entry: Uint8Array = this.#encoder.encode(value);
     const { length } = entry;
-    this.number(length);
+    // this.number(length);
     this.#allocate(length);
     this.#data.set(entry, this.#byteOffset);
     this.#byteOffset += length;
+    this.#tag(TAG.END);
     return this;
   }
 
