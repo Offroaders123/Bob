@@ -70,6 +70,7 @@ export class BOBReader {
   }
 
   number(): number {
+    this.#tag(TAG.NUMBER);
     let result: number = 0;
     let shift: number = 0;
     while (true) {
