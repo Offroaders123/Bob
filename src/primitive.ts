@@ -8,10 +8,10 @@ export interface BOBObject {
 
 export enum TAG {
   END = -1,
-  STRING = 0,
-  NUMBER,
-  BOOLEAN,
   NULL,
+  BOOLEAN,
+  NUMBER,
+  STRING,
   ARRAY,
   OBJECT
 }

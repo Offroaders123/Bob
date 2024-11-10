@@ -53,6 +53,7 @@ export class BOBWriter {
     this.#tag(TAG.STRING);
     const entry: Uint8Array = this.#encoder.encode(value);
     const { length } = entry;
+    this.number(length);
     this.#allocate(length);
     this.#data.set(entry, this.#byteOffset);
     this.#byteOffset += length;
