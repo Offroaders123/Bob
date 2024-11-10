@@ -31,9 +31,7 @@ export class BOBWriter {
   }
 
   #tag(value: TAG): this {
-    this.#allocate(1);
-    this.#view.setUint8(this.#byteOffset, value);
-    this.#byteOffset += 1;
+    this.#byte(value);
     return this;
   }
 

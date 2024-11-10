@@ -27,9 +27,7 @@ export class BOBReader {
   #tag<T extends TAG>(tag: T): T;
   #tag(): TAG;
   #tag(tag?: TAG): TAG {
-    this.#allocate(1);
-    const type: number = this.#view.getUint8(this.#byteOffset);
-    this.#byteOffset += 1;
+    const type: number = this.#byte();
     if (!isTag(type)) {
       throw new Error(`Encountered unsupported tag type '${type}' at byte offset ${this.#byteOffset}`);
     }
