@@ -9,7 +9,7 @@ console.log(data);
 const binary: Uint8Array = write(data);
 console.log(Buffer.from(binary.buffer));
 
+await writeFile(new URL("./package.bob", import.meta.url), binary);
+
 const redata: BOBPrimitive = read(binary);
 console.log(redata);
-
-await writeFile(new URL("./package.bob", import.meta.url), binary);
