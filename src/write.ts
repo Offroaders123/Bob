@@ -103,7 +103,6 @@ export class BOBWriter {
       if (type === null) continue;
       this.primitive(entry);
     }
-    this.#tag(TAG.END);
     return this;
   }
 
@@ -119,6 +118,7 @@ export class BOBWriter {
       this.string(name);
       this.primitive(entry);
     }
+    this.#tag(TAG.END);
     return this;
   }
 }
