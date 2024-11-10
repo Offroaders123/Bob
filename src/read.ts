@@ -1,4 +1,4 @@
-import { getTag, isTag, TAG } from "./primitive.js";
+import { isTag, TAG } from "./primitive.js";
 
 import type { BOBArray, BOBObject, BOBPrimitive } from "./primitive.js";
 
@@ -24,12 +24,17 @@ export class BOBReader {
     }
   }
 
-  #tag(): TAG {
+  #tag<T extends TAG>(tag: T): T;
+  #tag(): TAG;
+  #tag(tag?: TAG): TAG {
     this.#allocate(1);
     const type: number = this.#view.getUint8(this.#byteOffset);
     this.#byteOffset += 1;
     if (!isTag(type)) {
       throw new Error(`Encountered unsupported tag type '${type}' at byte offset ${this.#byteOffset}`);
+    }
+    if (tag !== undefined && type !== tag) {
+      throw new Error(`Encountered unexpected tag type '${type}' at byte offset ${this.#byteOffset}, expected 'TAG.${TAG[tag]}'`);
     }
     return type;
   }
@@ -45,31 +50,75 @@ export class BOBReader {
     const type: TAG = this.#tag();
     this.#byteOffset -= 1;
     switch (type) {
+      case TAG.END: throw new Error(`Encountered unexpected 'TAG.${TAG[TAG.END]}' at byte offset ${this.#byteOffset}`);
       case TAG.STRING: return this.string();
       case TAG.NUMBER: return this.number();
       case TAG.BOOLEAN: return this.boolean();
       case TAG.NULL: return this.null();
       case TAG.ARRAY: return this.array();
       case TAG.OBJECT: return this.object();
-      default: throw new Error(`Encountered unsupported tag type '${type}' at byte offset ${this.#byteOffset + 1}`);
     }
   }
 
   string(): string {
-    const type: TAG = this.#tag();
-    if (type !== TAG.STRING) {
-      throw new Error(`Expected string tag, found '${TAG[type]}'`);
-    }
-    const entry: string = this.#decoder.decode(this.#data.subarray(this.#byteOffset, this.#byteOffset + length));
+    this.#tag(TAG.STRING);
+    const length: number = this.number();
+    this.#allocate(length);
+    const value: string = this.#decoder.decode(this.#data.subarray(this.#byteOffset, this.#byteOffset + length));
+    this.#byteOffset += length;
+    return value;
   }
 
-  number(): number {}
+  number(): number {
+    let result: number = 0;
+    let shift: number = 0;
+    while (true) {
+      this.#allocate(1);
+      const byte: number = this.#byte();
+      result |= ((byte & 0x7F) << shift);
+      if (!(byte & 0x80)) break;
+      shift += 7;
+      if (shift > 63) {
+        throw new Error(`VarInt size '${shift}' at byte offset ${this.#byteOffset} is too large`);
+      }
+    }
+    const zigzag: number = ((((result << 63) >> 63) ^ result) >> 1) ^ (result & (1 << 63));
+    return zigzag;
+  }
 
-  boolean(): boolean {}
+  boolean(): boolean {
+    this.#tag(TAG.BOOLEAN);
+    this.#allocate(1);
+    const value: boolean = Boolean(this.#view.getUint8(this.#byteOffset));
+    return value;
+  }
 
-  null(): null {}
+  null(): null {
+    this.#tag(TAG.NULL);
+    return null;
+  }
 
-  array(): BOBArray<BOBPrimitive> {}
+  array(): BOBArray<BOBPrimitive> {
+    this.#tag(TAG.ARRAY);
+    const length: number = this.number();
+    const value: BOBArray<BOBPrimitive> = [];
+    for (let i: number = 0; i < length; i++) {
+      const entry: BOBPrimitive = this.primitive();
+      value.push(entry);
+    }
+    return value;
+  }
 
-  object(): BOBObject {}
+  object(): BOBObject {
+    this.#tag(TAG.OBJECT);
+    const value: BOBObject = {};
+    while (true) {
+      const type: TAG = this.#tag();
+      if (type === TAG.END) break;
+      const name: string = this.string();
+      const entry: BOBPrimitive = this.primitive();
+      value[name] = entry;
+    }
+    return value;
+  }
 }
