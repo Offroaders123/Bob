@@ -1,4 +1,4 @@
-import { getTag, TAG } from "./primitive.js";
+import { getTag, isTag, TAG } from "./primitive.js";
 
 import type { BOBArray, BOBObject, BOBPrimitive } from "./primitive.js";
 
@@ -24,13 +24,44 @@ export class BOBReader {
     }
   }
 
-  #tag(): TAG {}
+  #tag(): TAG {
+    this.#allocate(1);
+    const type: number = this.#view.getUint8(this.#byteOffset);
+    this.#byteOffset += 1;
+    if (!isTag(type)) {
+      throw new Error(`Encountered unsupported tag type '${type}' at byte offset ${this.#byteOffset}`);
+    }
+    return type;
+  }
 
-  #byte(): number {}
+  #byte(): number {
+    this.#allocate(1);
+    const value: number = this.#view.getInt8(this.#byteOffset);
+    this.#byteOffset += 1;
+    return value;
+  }
 
-  primitive(): BOBPrimitive {}
+  primitive(): BOBPrimitive {
+    const type: TAG = this.#tag();
+    this.#byteOffset -= 1;
+    switch (type) {
+      case TAG.STRING: return this.string();
+      case TAG.NUMBER: return this.number();
+      case TAG.BOOLEAN: return this.boolean();
+      case TAG.NULL: return this.null();
+      case TAG.ARRAY: return this.array();
+      case TAG.OBJECT: return this.object();
+      default: throw new Error(`Encountered unsupported tag type '${type}' at byte offset ${this.#byteOffset + 1}`);
+    }
+  }
 
-  string(): string {}
+  string(): string {
+    const type: TAG = this.#tag();
+    if (type !== TAG.STRING) {
+      throw new Error(`Expected string tag, found '${TAG[type]}'`);
+    }
+    const entry: string = this.#decoder.decode(this.#data.subarray(this.#byteOffset, this.#byteOffset + length));
+  }
 
   number(): number {}
 
@@ -38,7 +69,7 @@ export class BOBReader {
 
   null(): null {}
 
-  array(): BOBArray<BOBPrimitive | undefined> {}
+  array(): BOBArray<BOBPrimitive> {}
 
   object(): BOBObject {}
 }

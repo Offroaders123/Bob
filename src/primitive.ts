@@ -16,6 +16,14 @@ export enum TAG {
   OBJECT
 }
 
+export function isTag<T extends BOBPrimitive>(value: unknown): value is T {
+  return getTag(value) !== null;
+}
+
+export function isTagType(type: unknown): type is TAG {
+  return typeof type === "number" && type in TAG;
+}
+
 export function getTag(value: BOBPrimitive): TAG;
 export function getTag(value: unknown): TAG | null;
 export function getTag(value: unknown): TAG | null {
