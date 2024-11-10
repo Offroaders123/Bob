@@ -9,9 +9,6 @@
     "dev": "tsc --watch",
     "test": "tsx --test --watch ./test/index.test.ts"
   },
-  "dependencies": {
-    "mutf-8": "^1.1.4"
-  },
   "devDependencies": {
     "@types/node": "^22.9.0",
     "tsx": "^4.19.2",
