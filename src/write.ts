@@ -91,6 +91,8 @@ export class BOBWriter {
 
   array(value: BOBArray<BOBPrimitive | undefined>): this {
     this.#tag(TAG.ARRAY);
+    const { length } = value;
+    this.number(length);
     for (const entry of value) {
       if (entry === undefined) {
         this.null();
@@ -100,7 +102,6 @@ export class BOBWriter {
       if (type === null) continue;
       this.primitive(entry);
     }
-    this.#tag(TAG.END);
     return this;
   }
 

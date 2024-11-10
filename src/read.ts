@@ -100,10 +100,8 @@ export class BOBReader {
   array(): BOBArray<BOBPrimitive> {
     this.#tag(TAG.ARRAY);
     const value: BOBArray<BOBPrimitive> = [];
-    while (true) {
-      const type: TAG = this.#tag();
-      this.#byteOffset -= 1;
-      if (type === TAG.END) break;
+    const length: number = this.number();
+    for (let i: number = 0; i < length; i++) {
       const entry: BOBPrimitive = this.primitive();
       value.push(entry);
     }
