@@ -81,6 +81,7 @@ export class BOBWriter {
     this.#tag(TAG.BOOLEAN);
     this.#allocate(1);
     this.#view.setUint8(this.#byteOffset, Number(value));
+    this.#byteOffset += 1;
     return this;
   }
 

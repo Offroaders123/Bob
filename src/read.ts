@@ -89,6 +89,7 @@ export class BOBReader {
     this.#tag(TAG.BOOLEAN);
     this.#allocate(1);
     const value: boolean = Boolean(this.#view.getUint8(this.#byteOffset));
+    this.#byteOffset += 1;
     return value;
   }
 
