@@ -1,4 +1,5 @@
 import { writeFile } from "node:fs/promises";
+import { deepStrictEqual } from "node:assert";
 import { read, write } from "../src/index.js";
 import data from "../package.json" with { type: "json" };
 
@@ -13,3 +14,5 @@ await writeFile(new URL("./package.bob", import.meta.url), binary);
 
 const redata: BOBPrimitive = read(binary);
 console.log(redata);
+
+deepStrictEqual(data, redata);
