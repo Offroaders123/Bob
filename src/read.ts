@@ -124,8 +124,8 @@ export class BOBReader {
     const value: BOBObject = {};
     while (true) {
       const type: TAG = this.#tag();
-      this.#byteOffset -= 1;
       if (type === TAG.END) break;
+      this.#byteOffset -= 1;
       const name: string = this.string();
       const entry: BOBPrimitive = this.primitive();
       value[name] = entry;
