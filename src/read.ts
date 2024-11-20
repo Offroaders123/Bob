@@ -2,9 +2,9 @@ import { isTag, TAG } from "./primitive.js";
 
 import type { BOBArray, BOBObject, BOBPrimitive } from "./primitive.js";
 
-export function read(data: Uint8Array): BOBPrimitive {
+export function read<T extends BOBPrimitive>(data: Uint8Array): T {
   const reader: BOBReader = new BOBReader(data);
-  return reader.primitive();
+  return reader.primitive<T>();
 }
 
 export class BOBReader {
@@ -44,6 +44,7 @@ export class BOBReader {
     return value;
   }
 
+  primitive<T extends BOBPrimitive>(): T;
   primitive(): BOBPrimitive {
     const type: TAG = this.#tag();
     this.#byteOffset -= 1;
