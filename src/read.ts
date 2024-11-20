@@ -4,11 +4,7 @@ import type { BOBArray, BOBObject, BOBPrimitive } from "./primitive.js";
 
 export function read(data: Uint8Array): BOBPrimitive {
   const reader: BOBReader = new BOBReader(data);
-  try {
-    return reader.primitive();
-  } finally {
-    reader.validate();
-  }
+  return reader.primitive();
 }
 
 export class BOBReader {
@@ -46,13 +42,6 @@ export class BOBReader {
     const value: number = this.#view.getInt8(this.#byteOffset);
     this.#byteOffset += 1;
     return value;
-  }
-
-  validate(): void {
-    if (this.#data.byteLength > this.#byteOffset) {
-      const remaining: number = this.#data.byteLength - this.#byteOffset;
-      throw new Error(`Encountered unexpected End tag at byte offset ${this.#byteOffset}, ${remaining} unread bytes remaining`);
-    }
   }
 
   primitive(): BOBPrimitive {
@@ -130,7 +119,6 @@ export class BOBReader {
       const entry: BOBPrimitive = this.primitive();
       value[name] = entry;
     }
-    console.log("EXIT", value);
     return value;
   }
 }
