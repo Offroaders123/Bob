@@ -1,0 +1,23 @@
+{
+  "null": null,
+  "boolean": true,
+  "number": 24,
+  "string": "hello world!",
+  "array": [
+    null,
+    false,
+    25,
+    "hi mom",
+    [
+      {
+        "no place": "like home"
+      }
+    ],
+    {
+      "plancklengthville": "demiurgs"
+    }
+  ],
+  "object": {
+    "macaroni": "🧀"
+  }
+}
