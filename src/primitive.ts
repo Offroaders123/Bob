@@ -1,17 +1,10 @@
-export type BOBPrimitive<K extends keyof BOBPrimitiveMap = keyof BOBPrimitiveMap> = BOBPrimitiveMap[K];
+export type BOBPrimitive = string | number | boolean | null | BOBArray<BOBPrimitive> | BOBObject;
 
-export interface BOBPrimitiveMap {
-  NULL: null;
-  BOOLEAN: boolean;
-  NUMBER: number;
-  STRING: string;
-  ARRAY: BOBArray;
-  OBJECT: BOBObject;
+export interface BOBArray<T extends BOBPrimitive | undefined> extends Array<T> {}
+
+export interface BOBObject {
+  [key: string]: BOBPrimitive | undefined;
 }
-
-export type BOBArray = unknown[];
-
-export type BOBObject = Record<string, unknown>;
 
 export enum TAG {
   END = -1,
