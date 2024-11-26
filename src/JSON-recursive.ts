@@ -53,7 +53,18 @@ const replacer = (): Replacer => {
 }
 
 const reviver = (): Reviver => {
+  const unique = new Map<number, object>();
+  let i: number = 0;
   return function(key, value: unknown) {
+    if (typeof value === "object" && value !== null) {
+      if ("$ref" in value && typeof value.$ref === "number") {
+        return unique.get(value.$ref) ?? (() => { throw new Error("Couldn't find ref!"); })();
+      } else {
+        unique.set(i, value);
+        i++;
+        return value;
+      }
+    }
     return value;
   };
 }
