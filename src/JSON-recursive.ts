@@ -1,7 +1,25 @@
 import { deepStrictEqual } from "node:assert";
 import type { Replacer, Reviver } from "./JSON-replacer-reviver.js";
 
-console.log(globalThis);
+interface Demo {
+  demo: Demo;
+  nice: number;
+  hey: number;
+  what: string;
+  aaa: number[];
+}
+
+const demo: Demo = {
+  demo: {} as Demo,
+  nice: 5,
+  hey: 2,
+  what: "hey",
+  aaa: [3, 2, 1]
+};
+
+demo.demo = demo;
+
+console.log(demo);
 
 interface Ref {
   $ref: number;
@@ -32,9 +50,9 @@ const reviver = (): Reviver => {
   };
 }
 
-const globb = JSON.stringify(globalThis, replacer());
+const globb = JSON.stringify(demo, replacer());
 
-const globbed: typeof globalThis = JSON.parse(globb, reviver());
+const globbed: typeof demo = JSON.parse(globb, reviver());
 console.log(globbed);
 
-// deepStrictEqual(globalThis, globbed);
+// deepStrictEqual(demo, globbed);
