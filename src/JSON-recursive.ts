@@ -7,6 +7,10 @@ interface Demo {
   hey: number;
   what: string;
   aaa: number[];
+  gg: {
+    aaa: Demo["aaa"];
+    demo: Demo;
+  };
 }
 
 const demo: Demo = {
@@ -14,10 +18,16 @@ const demo: Demo = {
   nice: 5,
   hey: 2,
   what: "hey",
-  aaa: [3, 2, 1]
+  aaa: [3, 2, 1],
+  gg: {
+    aaa: {} as Demo["aaa"],
+    demo: {} as Demo
+  }
 };
 
 demo.demo = demo;
+demo.gg.aaa = demo.aaa;
+demo.gg.demo = demo;
 
 console.log(demo);
 
