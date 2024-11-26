@@ -36,39 +36,13 @@ interface Ref {
 }
 
 const replacer = (): Replacer => {
-  const seen = new WeakMap<object, number>();
-  let idCounter = 0;
-
-  return function (key, value) {
-    if (typeof value === "object" && value !== null) {
-      if (seen.has(value)) {
-        // Circular reference detected
-        return { $ref: seen.get(value) };
-      } else {
-        // Assign a unique ID to the object
-        const id = idCounter++;
-        seen.set(value, id);
-        (value as any).$id = id; // Add a unique identifier for reference
-      }
-    }
+  return function(key, value: unknown) {
     return value;
   };
 }
 
 const reviver = (): Reviver => {
-  const idMap = new Map<number, any>();
-
-  return function (key, value) {
-    if (value && typeof value === "object") {
-      if ("$id" in value) {
-        // Store objects with IDs
-        idMap.set(value.$id, value);
-      }
-      if ("$ref" in value) {
-        // Replace references with actual objects
-        return idMap.get(value.$ref);
-      }
-    }
+  return function(key, value: unknown) {
     return value;
   };
 }
