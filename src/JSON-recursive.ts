@@ -36,31 +36,45 @@ interface Ref {
 }
 
 const replacer = (): Replacer => {
-  const refs = new WeakMap<object, Ref>();
-  let id: number = 0;
-  return function(key, value: unknown) {
-    if (typeof value !== "object" || value === null) return value;
-    if (refs.has(value)) return refs.get(value)!;
-    refs.set(value, { $ref: id++ });
+  const seen = new WeakMap<object, number>();
+  let idCounter = 0;
+
+  return function (key, value) {
+    if (typeof value === "object" && value !== null) {
+      if (seen.has(value)) {
+        // Circular reference detected
+        return { $ref: seen.get(value) };
+      } else {
+        // Assign a unique ID to the object
+        const id = idCounter++;
+        seen.set(value, id);
+        (value as any).$id = id; // Add a unique identifier for reference
+      }
+    }
     return value;
   };
 }
 
 const reviver = (): Reviver => {
-  const refs = new Map<number, Ref>();
-  let id: number = 0;
-  return function(key, value: unknown) {
-    if (typeof value !== "object" || value === null) return value;
-    if ("$ref" in value && typeof value.$ref === "number") {
-      return refs.get(id);
-    } else {
-      refs.set(id++, value as Ref);
-      return value;
+  const idMap = new Map<number, any>();
+
+  return function (key, value) {
+    if (value && typeof value === "object") {
+      if ("$id" in value) {
+        // Store objects with IDs
+        idMap.set(value.$id, value);
+      }
+      if ("$ref" in value) {
+        // Replace references with actual objects
+        return idMap.get(value.$ref);
+      }
     }
+    return value;
   };
 }
 
 const globb = JSON.stringify(demo, replacer());
+console.log(globb);
 
 const globbed: typeof demo = JSON.parse(globb, reviver());
 console.log(globbed);
