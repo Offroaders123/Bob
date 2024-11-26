@@ -36,7 +36,18 @@ interface Ref {
 }
 
 const replacer = (): Replacer => {
+  const unique = new WeakMap<object, number>();
+  let i: number = 0;
   return function(key, value: unknown) {
+    if (typeof value === "object" && value !== null) {
+      if (!unique.has(value)) {
+        unique.set(value, i);
+        i++;
+        return value;
+      } else {
+        return { $ref: unique.get(value) ?? (() => { throw new Error("Couldn't find ref!") })() } satisfies Ref;
+      }
+    }
     return value;
   };
 }
