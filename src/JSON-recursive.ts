@@ -41,6 +41,11 @@ const replacer = (): Replacer => {
   return function(key, value: unknown) {
     if (typeof value === "object" && value !== null) {
       if (!unique.has(value)) {
+        if (Array.isArray(value)) {
+          value.unshift(i);
+        } else {
+          value.$id = i;
+        }
         unique.set(value, i);
         i++;
         return value;
@@ -53,17 +58,40 @@ const replacer = (): Replacer => {
 }
 
 const reviver = (): Reviver => {
-  const unique = new Map<number, object>();
-  let i: number = 0;
+  const unique: object[] = [];
+  const pending: { parent: any; key: string | number; ref: number; }[] = [];
+
   return function(key, value: unknown) {
     if (typeof value === "object" && value !== null) {
       if ("$ref" in value && typeof value.$ref === "number") {
-        return unique.get(value.$ref) ?? (() => { throw new Error("Couldn't find ref!"); })();
-      } else {
-        unique.set(i, value);
-        i++;
+        const id: number = value.$ref;
+        if (unique[id]) {
+          return unique[id]; // Return resolved reference immediately
+        }
+        // Store unresolved reference for later resolution
+        pending.push({ parent: this, key, ref: id });
+        return value; // Leave unresolved temporarily
+      } else if ("$id" in value) {
+        const id: number = value.$id;
+        delete value.$id;
+        unique[id] = value;
+        return value; // Ensure value is stored and returned
+      } else if (Array.isArray(value)) {
+        const id: number = value.shift();
+        unique[id] = value;
         return value;
       }
+    }
+
+    // Resolve any pending references at the top-level object
+    if (key === "" && pending.length) {
+      pending.forEach(({ parent, key, ref }) => {
+        if (unique[ref]) {
+          parent[key] = unique[ref]; // Assign resolved object reference
+        } else {
+          throw new Error(`Unresolved reference: $ref ${ref}`);
+        }
+      });
     }
     return value;
   };
