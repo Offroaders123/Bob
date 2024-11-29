@@ -41,14 +41,14 @@ const replacer = (): Replacer => {
   return function(key, value: unknown) {
     if (typeof value === "object" && value !== null) {
       if (!unique.has(value)) {
-        if (Array.isArray(value)) {
-          value.unshift(i);
-        } else {
-          value.$id = i;
-        }
-        unique.set(value, i);
+        const id: number = i;
+        unique.set(value, id);
         i++;
-        return value;
+        if (Array.isArray(value)) {
+          return [id, ...value];
+        } else {
+          return { ...value, $id: id };
+        }
       } else {
         return { $ref: unique.get(value) ?? (() => { throw new Error("Couldn't find ref!") })() } satisfies Ref;
       }
@@ -110,4 +110,4 @@ console.log("Circular references restored:", globbed.demo === globbed);
 console.log("Nested reference works:", globbed.gg.demo === globbed);
 console.log("Array preserved:", globbed.aaa === globbed.gg.aaa);
 
-// deepStrictEqual(demo, globbed);
+deepStrictEqual(demo, globbed);
