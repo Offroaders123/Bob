@@ -66,16 +66,14 @@ const reviver = (): Reviver => {
       if ("$ref" in value && typeof value.$ref === "number") {
         const id: number = value.$ref;
         if (unique[id]) {
-          return unique[id]; // Return resolved reference immediately
+          return unique[id];
         }
-        // Store unresolved reference for later resolution
         pending.push({ parent: this, key, ref: id });
-        return value; // Leave unresolved temporarily
+        return value;
       } else if ("$id" in value && typeof value.$id === "number") {
         const id: number = value.$id;
         delete value.$id;
         unique[id] = value;
-        // return value; // Ensure value is stored and returned
       } else if (Array.isArray(value)) {
         const id: number = value.shift();
         unique[id] = value;
@@ -83,12 +81,10 @@ const reviver = (): Reviver => {
       }
     }
 
-    // Resolve any pending references at the top-level object
     if (key === "" && pending.length) {
-      // console.log(pending);
       for (const { parent, key, ref } of pending) {
         if (unique[ref]) {
-          parent[key] = unique[ref]; // Assign resolved object reference
+          parent[key] = unique[ref];
         } else {
           throw new Error(`Unresolved reference: $ref ${ref}`);
         }
