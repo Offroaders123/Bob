@@ -38,7 +38,7 @@ interface Ref {
 const replacer = (): Replacer => {
   const unique = new WeakMap<object, number>();
   let i: number = 0;
-  return function(key, value: unknown) {
+  return function(_key, value: unknown) {
     if (typeof value === "object" && value !== null) {
       if (!unique.has(value)) {
         const id: number = i;
@@ -71,7 +71,7 @@ const reviver = (): Reviver => {
         // Store unresolved reference for later resolution
         pending.push({ parent: this, key, ref: id });
         return value; // Leave unresolved temporarily
-      } else if ("$id" in value) {
+      } else if ("$id" in value && typeof value.$id === "number") {
         const id: number = value.$id;
         delete value.$id;
         unique[id] = value;
@@ -86,13 +86,13 @@ const reviver = (): Reviver => {
     // Resolve any pending references at the top-level object
     if (key === "" && pending.length) {
       // console.log(pending);
-      pending.forEach(({ parent, key, ref }) => {
+      for (const { parent, key, ref } of pending) {
         if (unique[ref]) {
           parent[key] = unique[ref]; // Assign resolved object reference
         } else {
           throw new Error(`Unresolved reference: $ref ${ref}`);
         }
-      });
+      }
       unique.length = 0;
       pending.length = 0;
     }
