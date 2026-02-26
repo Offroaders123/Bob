@@ -38,7 +38,7 @@ interface Ref {
 const replacer = (): Replacer => {
   const unique = new WeakMap<object, number>();
   let i: number = 0;
-  return function(_key, value: unknown) {
+  return function (_key, value: unknown) {
     if (typeof value === "object" && value !== null) {
       if (!unique.has(value)) {
         const id: number = i;
@@ -61,7 +61,7 @@ const reviver = (): Reviver => {
   const unique: object[] = [];
   const pending: { parent: any; key: string | number; ref: number; }[] = [];
 
-  return function(key, value: unknown) {
+  return function (key, value: unknown) {
     if (typeof value === "object" && value !== null) {
       if ("$ref" in value && typeof value.$ref === "number") {
         const id: number = value.$ref;

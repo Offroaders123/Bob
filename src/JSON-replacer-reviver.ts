@@ -29,7 +29,7 @@ export type Replacer = (this: any, key: string, value: any) => any;
 
 export type Reviver = (this: any, key: string, value: any) => any;
 
-const replacer: Replacer = function(_key, value) {
+const replacer: Replacer = function (_key, value) {
   // console.log("THIS", _key, this);
   // console.log("VALUE", value);
   switch (true) {
@@ -41,7 +41,7 @@ const replacer: Replacer = function(_key, value) {
   // return value;
 };
 
-const reviver: Reviver = function(_key, value) {
+const reviver: Reviver = function (_key, value) {
   // console.log("THIS", _key, this);
   // console.log("VALUE", value);
   if (!Array.isArray(value)) return value;
